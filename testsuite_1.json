@@ -1,0 +1,396 @@
+{
+	"info": {
+		"_postman_id": "25a9e509-64d8-4700-bf0b-4638c0c26e09",
+		"name": "Regression_TestSuite_General with Data Versioning",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "29850463"
+	},
+	"item": [
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "AuthToken_general",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();\r",
+									"pm.globals.set(\"auth\", jsonData.access_token);\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const moment = require('moment');\r",
+									"pm.globals.set(\"timestamp\", moment().format(\"YYYY-MM-DD\"));"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/x-www-form-urlencoded"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "client_id",
+									"value": "<CLIENT_ID>",
+									"description": "Your client ID goes here",
+									"type": "text"
+								},
+								{
+									"key": "client_secret",
+									"value": "<CLIENT_SECRET>",
+									"description": "Your client secret goes here",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "https://<API_HOST>/oauth/client_credential/accesstoken?grant_type=client_credentials",
+							"protocol": "https",
+							"host": [
+								"<API_HOST>"
+							],
+							"path": [
+								"oauth",
+								"client_credential",
+								"accesstoken"
+							],
+							"query": [
+								{
+									"key": "grant_type",
+									"value": "client_credentials"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Data Refresh Discovery",
+			"item": [
+				{
+					"name": "Master Table Refresh UUID Discovery",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Sets global variable report_id so that ALL other calls work.",
+									"var jsonData = pm.response.json();",
+									"pm.globals.set(\"refresh_uuid\", jsonData.refresh_uuid);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{urlRootPath}}/datafeed/refreshes",
+							"host": [
+								"{{urlRootPath}}"
+							],
+							"path": [
+								"datafeed",
+								"refreshes"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Test Payloads",
+			"item": [
+				{
+					"name": "DataFeedValidation",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();\r",
+									"\r",
+									"pm.test(\"Check expected response object is present - status, data\", function() {\r",
+									"    let objectKeys = ['status', 'data'];\r",
+									"    objectKeys.forEach(key => {\r",
+									"        pm.expect(key in jsonData).to.be.true;\r",
+									"    });\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Verify all Keys and correct Value Types are returned\", function () {\r",
+									"    pm.expect(jsonData.status).to.be.a(\"string\");\r",
+									"    pm.expect(jsonData.status).to.eql(\"success\");\r",
+									"    pm.expect(jsonData.data.insights_id).to.be.a(\"number\");\r",
+									"    pm.expect(jsonData.data.insights_id).to.be.above(0);\r",
+									"    pm.expect(jsonData.data.insights_name).to.be.a(\"string\");\r",
+									"    pm.expect(jsonData.data.ref_id).to.be.a(\"string\");\r",
+									"    pm.expect(jsonData.data.insights_type).to.be.a(\"string\");\r",
+									"    pm.expect(jsonData.data.insights_status).to.be.a(\"string\");\r",
+									"    pm.expect(jsonData.data.yyyymmdd_start).to.be.a(\"number\");\r",
+									"    pm.expect(jsonData.data.yyyymmdd_end).to.be.a(\"number\");\r",
+									"    pm.expect(jsonData.data.yyyymmdd_start).to.be.above(0);\r",
+									"    pm.expect(jsonData.data.yyyymmdd_end).to.be.above(0);\r",
+									"    pm.expect(jsonData.data.audience_type).to.be.a(\"string\");\r",
+									"    pm.expect(jsonData.data.audience_type).to.eql(\"audience_type\");\r",
+									"    pm.expect(jsonData.data.breakout_geo).to.be.a(\"string\");\r",
+									"    pm.expect(jsonData.data.breakout_channel).to.be.a(\"boolean\");\r",
+									"    pm.expect(jsonData.data.breakout_interval).to.be.a(\"string\");\r",
+									"    pm.expect(jsonData.data.cardtype_counts).to.be.a(\"boolean\");\r",
+									"    pm.expect(jsonData.data.output_format).to.be.a(\"string\");\r",
+									"    pm.expect(jsonData.data.output_format).to.eql(\"csv\");\r",
+									"    pm.expect(jsonData.data.output_compression).to.be.a(\"string\");\r",
+									"    pm.expect(jsonData.data.output_compression).to.eql(\"none\");\r",
+									"    pm.expect(jsonData.data.include_yoy).to.be.a(\"boolean\");\r",
+									"    pm.expect(jsonData.data.breakout_cardtype).to.be.a(\"boolean\");\r",
+									"    pm.expect(jsonData.data.brand_ids).to.be.an(\"array\");\r",
+									"    pm.expect(jsonData.data.afscatids).to.be.an(\"array\");\r",
+									"    pm.expect(jsonData.data.mccs).to.be.an(\"array\");\r",
+									"    pm.expect(jsonData.data.table_name).to.be.a(\"string\");\r",
+									"    pm.expect(jsonData.data.table_name).to.include(\"tmp_api_reports\");\r",
+									"    pm.expect(jsonData.data.table_name).to.include(jsonData.data.insights_id);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Insight Type returned\", function () {\r",
+									"    pm.expect(jsonData.data.insights_type).to.eql(\"insights_type\");\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Insight Status queued returned\", function () {\r",
+									"    pm.expect(jsonData.data.insights_status).to.eql(\"queued\");\r",
+									"});\r",
+									"// Sets Collection variable report_id1 so that report status can be verified based on this id by next request\r",
+									"pm.collectionVariables.set(\"obsn_id1\", jsonData.data.insights_id);\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"//Delay of 3 mins.\r",
+									"setTimeout(function(){\r",
+									"    console.log(\"Three minutes have passed!\");\r",
+									"}, 180000);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {
+							"connection": true,
+							"accept-encoding": true,
+							"accept": true,
+							"user-agent": true,
+							"host": true,
+							"content-length": true
+						}
+					},
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"yyyymmdd_start\": 20230101,\r\n    \"yyyymmdd_end\": 20230131,\r\n    \"insights_type\": \"datafeed_all\",\r\n    \"insights_name\": \"<TEST_NAME>\",\r\n    \"ref_id\": \"<REF_ID>\",\r\n    \"breakout_interval\": \"monthly\",\r\n    \"refresh_uuid\": \"{{refresh_uuid}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{urlRootPath}}/datafeed",
+							"host": [
+								"{{urlRootPath}}"
+							],
+							"path": [
+								"datafeed"
+							]
+						},
+						"description": "Validates the data feed with various parameters."
+					},
+					"response": []
+				},
+				{
+					"name": "Negative_DataFeedValidation_MaxBreakouts",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Successful Negative POST request\", function () {\r",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 400, 404]);\r",
+									"});\r",
+									"\r",
+									"var jsonData = pm.response.json();\r",
+									"\r",
+									"pm.test(\"Check expected response object message and errors is present\", function () {\r",
+									"    let objectKeys = ['message', 'reason'];\r",
+									"    objectKeys.forEach(key => {\r",
+									"        pm.expect(key in jsonData).to.be.true;\r",
+									"    });\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"invalidCreateRequest message\", function () {\r",
+									"    pm.expect(jsonData.reason).to.eql(\"invalidCreateRequest\");\r",
+									"});\r",
+									"\r",
+									"pm.test(\"6032 error returned\", function () {\r",
+									"    pm.expect(jsonData.code).to.eql(6032);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Invalid Create request message returned\", function () {\r",
+									"    pm.expect(jsonData.message).to.eql(\"Error_message\");\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"//Delay of 3 mins.",
+									"setTimeout(function(){",
+									"    console.log(\"Three minutes have passed!\");",
+									"}, 180000);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"yyyymmdd_start\": 20230101, \r\n    \"yyyymmdd_end\": 20230131, \r\n    \"insights_type\": \"datafeed_all\", \r\n    \"insights_name\": \"<TEST_NAME>\", \r\n    \"ref_id\": \"<REF_ID>\", \r\n    \"breakout_interval\": \"weekly\", \r\n    \"breakout_geo\": \"state\", \r\n    \"breakout_demo\": [\"age\", \"gender\", \"income\", \"ethnicity\"], \r\n    \"breakout_cardtype\": true ,\r\n    \"refresh_uuid\": \"{{refresh_uuid}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{urlRootPath}}/datafeed/",
+							"host": [
+								"{{urlRootPath}}"
+							],
+							"path": [
+								"datafeed",
+								""
+							]
+						},
+						"description": "Negative test case to validate data feed with max breakouts."
+					},
+					"response": []
+				}
+			],
+			"description": "Test payloads for various scenarios, including positive and negative cases."
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{auth}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "obsn_id1",
+			"value": ""
+		},
+		{
+			"key": "obsn_id2",
+			"value": ""
+		},
+		{
+			"key": "obsn_id4",
+			"value": ""
+		},
+		{
+			"key": "report_id1",
+			"value": ""
+		},
+		{
+			"key": "report_id2",
+			"value": ""
+		},
+		{
+			"key": "report_id3",
+			"value": ""
+		},
+		{
+			"key": "report_id4",
+			"value": ""
+		},
+		{
+			"key": "report_id5",
+			"value": ""
+		},
+		{
+			"key": "report_id6",
+			"value": ""
+		},
+		{
+			"key": "report_id7",
+			"value": ""
+		},
+		{
+			"key": "report_id8",
+			"value": ""
+		}
+	]
+}
