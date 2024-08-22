@@ -11,12 +11,12 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4  # Updated to v4
 
     - name: Install Node.js
-      uses: actions/setup-node@v2
+      uses: actions/setup-node@v3  # Updated to v3
       with:
-        node-version: '14'
+        node-version: '16'
 
     - name: Install Newman
       run: npm install -g newman
@@ -47,7 +47,7 @@ jobs:
       run: node generate-csv.js
 
     - name: Upload Results
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3  # Update if used, otherwise it's fine to keep the existing version
       with:
         name: summary-results
         path: summary_results.csv
