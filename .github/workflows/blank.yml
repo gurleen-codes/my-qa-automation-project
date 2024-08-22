@@ -21,6 +21,13 @@ jobs:
     - name: Install Newman
       run: npm install -g newman
 
+    - name: Check for required secrets
+      run: |
+        if [ -z "${{ secrets.API_URL }}" ] || [ -z "${{ secrets.API_KEY }}" ]; then
+          echo "API_URL or API_KEY is not set. Skipping tests."
+          exit 0
+        fi
+
     - name: Replace placeholders in environment file
       run: |
         sed -i 's|https://api.example.com/v3|${{ secrets.API_URL }}|' prod.postman_environment.json
@@ -28,7 +35,7 @@ jobs:
 
     - name: Run Newman Tests
       run: |
-        newman run testsuite_1.json -e prod.postman_environment.json -r json --reporter-json-export newman-results.json
+        newman run Regression_TestSuite_GB_003.json -e prod.postman_environment.json -r json --reporter-json-export newman-results.json
 
     - name: Run generate-csv.js
       run: node generate-csv.js
