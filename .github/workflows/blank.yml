@@ -38,7 +38,7 @@ jobs:
 
     - name: Run Newman Tests
       run: |
-        newman run Regression_TestSuite_GB_003.json -e prod.postman_environment.json -r json --reporter-json-export newman-results.json
+        newman run testsuite_1.json -e prod.postman_environment.json -r json --reporter-json-export newman-results.json
       env:
         API_URL: ${{ secrets.API_URL }}
         API_KEY: ${{ secrets.API_KEY }}
