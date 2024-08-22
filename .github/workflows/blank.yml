@@ -29,18 +29,22 @@ jobs:
         fi
 
     - name: Replace placeholders in environment file
+      if: secrets.API_URL && secrets.API_KEY
       run: |
         sed -i 's|https://api.example.com/v3|${{ secrets.API_URL }}|' prod.postman_environment.json
-        sed -i 's/YOUR_API_KEY_HERE/${{ secrets.API_KEY }}/' prod.postman_environment.json
+        sed -i 's/placeholder-key/${{ secrets.API_KEY }}/' prod.postman_environment.json
 
     - name: Run Newman Tests
+      if: secrets.API_URL && secrets.API_KEY
       run: |
         newman run Regression_TestSuite_GB_003.json -e prod.postman_environment.json -r json --reporter-json-export newman-results.json
 
     - name: Run generate-csv.js
+      if: secrets.API_URL && secrets.API_KEY
       run: node generate-csv.js
 
     - name: Upload Results
+      if: secrets.API_URL && secrets.API_KEY
       uses: actions/upload-artifact@v2
       with:
         name: summary-results
